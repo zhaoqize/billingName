@@ -1,7 +1,6 @@
 //***入口文件****//
+//import "babel-polyfill";
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import {Router} from 'react-router';
 
 import './resources/css/clearDefault.css'
@@ -10,16 +9,18 @@ import Header from './view/header/header.jsx';
 
 import router from './routes/routes.js';
 
-_main();
+
+
+
+window.rootURL = 'http://' + window.location.host;
+
 
 //outline渲染
-function _main() {
-    ReactDOM.render(
-    	<div>
-    		<Header />
-    	</div>
-    , document.getElementById('header'));
-}
+
+ReactDOM.render(
+	Header
+, document.getElementById('header'));
+
 
 //进入路由控制
 ReactDOM.render(
@@ -27,4 +28,5 @@ ReactDOM.render(
     document.getElementById('bodyer')
 
 );
+
 

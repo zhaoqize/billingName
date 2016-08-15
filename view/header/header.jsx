@@ -1,43 +1,43 @@
-import React  from 'react';
-import {Menu, Badge, Icon, Dropdown} from 'antd';
-import { hashHistory } from 'react-router';
+import { Menu, 
+         Badge, 
+         Icon, 
+         Dropdown} from 'antd';
+import { Link,
+         hashHistory,
+         Router,
+         Route } from 'react-router';
 import reqwest from 'reqwest';
 
 import '../../resources/css/antd.css';
 
-var Header = React.createClass({
-  getInitialState: function() {
-    return {value: 'Hello!'};
-  },
+import { ModalWarn,
+         ModalError } from '../component/index';
+
+var HearderTitle = React.createClass({
   handleClick: function(event) {
     hashHistory.push('/');
   },
-  render: function () {
-    var value = this.state.value;
+  render: function(){
     return (
-        <div style={{ position:'absolute',width:100+'%',top:13 }}>
-            <a style={{ color:'white' }} onClick={ this.handleClick }>
-              <h2 style={{ display:'inline-block',color:'white',marginLeft:2+'%' }}>计费名管理中心</h2>
-            </a>
-            <LoginUser />
-            <LoginNoc />
-        </div>
-    );
+        <a style={{ color:'white' }} onClick={ this.handleClick }>
+              <h2 style={{ display:'inline-block',color:'white',marginLeft:20 }}>计费名管理中心</h2>
+        </a>
+    )
   }
-});
+})
 
 var LoginNoc = React.createClass({
+  help:function(){
+    alert("暂无帮助或说明文档!");
+  },
 	render: function(){
 		return (
-			<div style={{ color:'white',display:'inline-block',marginRight:1+'%',float:'right' }}>
-				<Badge dot>
-	    			<Icon type="notification" />
-	  			</Badge>
+			<div style={{ color:'white',display:'inline-block',marginRight:'1%',float:'right' }} onClick={ this.help }>
+	    			<Icon type="question-circle-o" />
 			</div>
 		)
 	}
 })
-
 
 
 var LoginUser = React.createClass({
@@ -47,39 +47,76 @@ var LoginUser = React.createClass({
     };
   },
   componentDidMount: function() {
-    reqwest({
-      url: 'http://bnm.stnts.dev/user',
-      method: 'get',
-      type: 'json'
-    }).then(result => {
-      this.setState({
-        user : result.data
-      });
-    });
+    const _this = this;
+
+    //请求user
+    this.fetch({
+      url:'/user',
+      callbackone:function(result){
+        if(result.status === 'success'){
+          _this.setState({
+            user : result.data
+          });
+        }
+      },
+      callbacktwo:function(res){
+        if(res.status === 401){
+          ModalWarn('警告',res.response + '! 将跳转到登陆界面...')
+          setTimeout(function(){
+            window.location="http://192.168.2.6:8091";
+          },1500)
+        }
+      }
+    })
     
   },
-  toUserInfo:function(){
-    hashHistory.push('/business/userInfo');
+  signOff:function(){
+    this.fetch({
+      url:'/sign-off',
+      callbackone:function(result){
+        if(result.status === 200 ){
+          window.location="http://192.168.2.6:8091";
+        }else{
+          ModalError('警告','请求异常!');
+        }
+      },
+      callbacktwo:function(res){
+        ModalError('警告','请求异常!');
+      }
+    })
+  },
+  fetch:function(obj){
+    reqwest({
+      url: rootURL + obj.url,
+      method: 'get',
+      type: 'json'
+    }).then( (result) => {
+      obj.callbackone(result);
+    },function(res){
+      obj.callbacktwo(res);
+    });
   },
   render:function(){
     const menu = (
       <Menu>
         <Menu.Item key="0">
-          <a target="_self" href="/#/user/userInfo">个人资料</a>
+          <Link to={{ pathname:'/user/userInfo',state:this.state.user }}>个人资料</Link>
         </Menu.Item>
+        <Menu.Divider />
         <Menu.Item key="1">
-          <a target="_self" href="http://192.168.2.6:8091/login.do">退出登陆</a>
+          <a onClick={ this.signOff }>退出登陆</a>
         </Menu.Item>
       </Menu>
     );
     return (
       <span>
         <Dropdown overlay={menu}>
-          <a className="ant-dropdown-link" href="#" style={{ float:'right',marginRight:2+'%',color:'white'}}>
+          <a className="ant-dropdown-link"  style={{ float:'right',marginRight:20,color:'white'}}>
+            { this.state.user.true_name }
             <Icon type="down" />
           </a>
         </Dropdown>
-        <span style={{ color:'white',float:'right' }}>{ this.state.user.true_name }</span>
+        <span style={{ color:'white',float:'right' }}></span>
         &nbsp;&nbsp;
       </span>
        
@@ -87,5 +124,25 @@ var LoginUser = React.createClass({
   }
 })
 
+var Header = React.createClass({
+  render: function () {
+    return (
+        <div style={{ position:'absolute',width:'100%',lineHeight:'42px' }}>
+            <HearderTitle />
+            <LoginUser />
+            <LoginNoc />
+        </div>
+    );
+  }
+});
 
-module.exports = Header;
+
+var HeaderRoute = (
+  <Router history={ hashHistory }>
+    <Route path='*' component={ Header }></Route>
+  </Router>
+)
+
+export default HeaderRoute;
+
+

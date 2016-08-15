@@ -4,36 +4,44 @@
     <meta charset="UTF-8"/>
     <meta name="csrf-token" content="{{ csrf_token() }}"/>
     <style type="text/css">
+      body{
+        margin: 0;
+        padding: 0;
+      }
       #header{
-        height:50px;
-        background-color:#3C8DBC;
+        height:42px;
+        background:linear-gradient(to bottom, #2DB7F5 , #5FAFD1);
       }
       #bodyer{
-        height:95%;
+        height:96%;
         width:100%;
-      }
-      #sider{
-       height:100%;
-       width:10%;
-       float:left;
-      }
-      #mainer{
-       height:100%;
-       width:90%;
-       display:inline-block;
-      }
-      .trodd{
-        width: 130px;
-        text-align: right;
-      }
-      .treven{
-        margin-left: 20px;
       }
       .h2bgc{
         background-color: #f5f5dc;
       }
       .antd-hidden{
         display: none;
+      }
+      .ant-menu-submenu-inline > .ant-menu-submenu-title:after{
+        content:'' !important;
+      }
+      .my-commentmax-width{
+        max-width: 300px;
+        overflow: hidden;
+      }
+      .ant-menu-dark.ant-menu-inline .ant-menu-item-selected{
+        background:linear-gradient(to bottom, #2DB7F5 , #5FAFD1);
+      }
+      dt{
+        margin:0.5em !important;
+      }
+      dd{
+        margin:0.5em !important;
+        margin-left: 2em !important;
+      }
+      .hr-border{
+        border: 1px solid #E9E9E9;
+        border-width: 0 0 1px 0;
       }
     </style>
     
@@ -44,8 +52,6 @@
 
     <div id="bodyer"></div>
 
-   <!--  <script src="http://localhost:9090/webpack-dev-server.js"></script> -->
-    <!-- <script src="./build/bundle.js"></script> -->
     <script src="bundle.js"></script>
   </body>
 </html>

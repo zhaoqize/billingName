@@ -8,9 +8,9 @@ let modalWarn = function(title,content){
 
 	//设置自动关闭时间
 	setTimeout(function(){
-	  var btnClose = document.getElementsByClassName('ant-confirm-btns')[0].firstChild;
+	  var btnClose = document.getElementsByClassName('ant-confirm-btns')[0];
 	  if(btnClose){
-	  	btnClose.click();
+	  	btnClose.firstChild.click();
 	  }
 	},1500);
 }

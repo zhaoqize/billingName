@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Modal, 
          Button, 
          Table, 
@@ -7,166 +7,135 @@ import { Modal,
          Form,
          Select,
          message,
-         Cascader
+         Cascader,
+         Spin
        } from 'antd';
 import reqwest from 'reqwest';
 import {Link} from 'react-router';
 
-import Paging from '../../component/table.jsx';
+import { PlatformMap } from '../../commentMap/index';
+
+import { ModalSuccess, 
+         ModalError, 
+         Header } from '../../component/index';
 
 import '../../../resources/css/antd.css';
 
 const createForm = Form.create;
 const FormItem = Form.Item;
 const Option = Select.Option;
+const confirm = Modal.confirm;
+
+
 
 
 var FilterForm = React.createClass({
   getInitialState() {
       return {
           allFilter : {} ,
-          name:[],
-          channel:{} ,
-          ad:{},
-          platform:{},
-          current_ad:{}
+          name:[], 
+          channel:{} 
       };
+  },
+  handleReset:function(e){
+    e.preventDefault();
+    this.props.form.resetFields();
+    this.props.filterParam(this.props.form.getFieldsValue())
   },
   handleSubmit(e) {
     e.preventDefault();
    
-    var reciveData = this.props.form.getFieldsValue();
-    var formatData = {
-      channel:reciveData.channel,
-      status:reciveData.status,
-      name:reciveData.name[0],
-      child:reciveData.name[1]
-    }
-    this.props.filterParam(formatData);
-    console.log('处理后的表单值：', formatData);
+    console.log("表单值 = ",this.props.form.getFieldsValue())
+    
+    this.props.filterParam(this.props.form.getFieldsValue())
   },
-  fetch:function(url, callbackone, callbacktwo){
-    var _this = this;
-
+  fetch:function(url,callbackone,callbacktwo){
     reqwest({
-      url:url,
-      method: 'get',
-      type: 'json',
+        url:url,
+        method: 'get',
+        type: 'json',
     }).then(result =>{
-      if(_this.isMounted()){
+      if(this.isMounted()){
         callbackone(result.data);
       }
     },function(){
       callbacktwo();
-      console.log("失败")
     })
   },
   componentDidMount() {
-    var _this = this;
-    //拉计费名
-    this.fetch('http://localhost:90/business/BaiduXML/ad',function(data){
-        _this.setState({
-          name : data
-        })
+    const _this = this;
+
+    //拉子计费名数据
+    _this.fetch(rootURL + '/business/BaiduXML/parents',function(data){
+      if(_this.isMounted()){
+         _this.setState({
+            name:data
+          })
+      }
     },function(){
-        alert('ERROR');
+        console.log("拉取父子计费名数据失败");
     });
 
-    //拉渠道
-    this.fetch('http://localhost:90/business/BaiduXML/ad',function(data){
-        _this.setState({
-          channel : data
-        })
+    //拉当前子渠道数据 
+    _this.fetch(rootURL + '/channel/simple',function(data){
+       _this.setState({
+          channel:data
+       })
     },function(){
-      alert('ERROR');
+        console.log("拉取渠道数据 ");
     });
-
-    //拉广告位
-    this.fetch('http://localhost:90/business/BaiduXML/ad',function(data){
-        _this.setState({
-          ad : data
-        })
-    },function(){
-      alert('ERROR');
-    });
-
-    //拉平台
-    this.fetch('http://localhost:90/business/BaiduXML/ad',function(data){
-        _this.setState({
-          platform : data
-        })
-    },function(){
-      alert('ERROR');
-    });
-
-    //拉当前广告位
-    this.fetch('http://localhost:90/business/BaiduXML/ad',function(data){
-        _this.setState({
-          current_ad : data
-        })
-    },function(){
-      alert('ERROR');
-    });
-    
   },
   render:function(){
      const { getFieldProps } = this.props.form;
 
      //设置options
-     let name = [],
-         channel = [],
-         ad = [],
-         platform = [],
-         current_ad = [];
+     let name =[], 
+         channel = [<Option key value =''>全部</Option>];
 
      for (let i = 0; i < this.state.name.length; i++) {
-        name.push(<Option key={this.state.name[i].value}>{this.state.name[i].label}</Option>);
+        name.push(<Option key={this.state.name[i].id} title={this.state.name[i].name}>
+                    {this.state.name[i].name}
+                  </Option>);
      }
+
      for (let i = 0; i < this.state.channel.length; i++) {
-        channel.push(<Option key={this.state.channel[i].value}>{this.state.channel[i].label}</Option>);
-     }
-     for (let i = 0; i < this.state.ad.length; i++) {
-        ad.push(<Option key={this.state.ad[i].value}>{this.state.ad[i].label}</Option>);
-     }
-     for (let i = 0; i < this.state.platform.length; i++) {
-        platform.push(<Option key={this.state.platform[i].value}>{this.state.platform[i].label}</Option>);
-     }
-     for (let i = 0; i < this.state.current_ad.length; i++) {
-        current_ad.push(<Option key={this.state.current_ad[i].value}>{this.state.current_ad[i].label}</Option>);
+        channel.push(<Option key={this.state.channel[i].id} title={this.state.channel[i].name}>
+                        {this.state.channel[i].name}
+                     </Option>);
      }
 
      return (
-      <Form inline onSubmit={this.handleSubmit} style={{ marginLeft:1+'%',marginBottom:1+'%' }}>
+      <Form inline onSubmit={this.handleSubmit} style={{ margin:'20px 0 20px 20px' }}>
         <FormItem label="计费名">
-          <Cascader style={{ width: 200 }} options={ this.state.name } {...getFieldProps('name')} placeholder='请选择计费名'/>
+          <Select showSearch 
+                  notFoundContent="无法找到"
+                  optionFilterProp="children" style={{ width: 150 }} {...getFieldProps('name',{ initialValue:this.props.locationState.parentId + '' })} placeholder="请选择计费名">
+            { name }
+          </Select>
         </FormItem>
          <FormItem label="计费名状态">
-          <Select showSearch style={{ width: 100 }} {...getFieldProps('status')} placeholder='请选择状态'>
-           <Option key='启用'>启用</Option>
-           <Option key='删除'>删除</Option>
-          </Select>
-        </FormItem>
-        <FormItem label="当前渠道">
-          <Select showSearch style={{ width: 100 }} {...getFieldProps('channel')} placeholder='请选择渠道'>
-           { channel }
-          </Select>
-        </FormItem>
-        <FormItem label="所属广告位">
-          <Select showSearch style={{ width: 100 }} {...getFieldProps('ad')} placeholder='请选择广告位'>
-           { ad }
+          <Select  style={{ width: 100 }} {...getFieldProps('status',{ initialValue:'all' })} placeholder="启用" >
+           <Option key='all'>全部</Option>
+           <Option key='use'>启用</Option>
+           <Option key='deleted'>删除</Option>
           </Select>
         </FormItem>
         <FormItem label="投放平台">
-          <Select showSearch style={{ width: 100 }} {...getFieldProps('platform')} placeholder='请选择平台'>
-           { platform }
+          <Select  style={{ width: 100 }} {...getFieldProps('line')} placeholder="请选择平台" >
+           <Option key value =''>全部</Option>
+           <Option key='online'>淘金</Option>
+           <Option key='offline'>线下</Option>
           </Select>
         </FormItem>
-        <FormItem label="当前广告位">
-          <Select showSearch style={{ width: 130 }} {...getFieldProps('ad')} placeholder='请选择当前广告位'>
-           { current_ad }
+        <FormItem label="当前渠道">
+          <Select showSearch 
+                  optionFilterProp="children"
+                  notFoundContent="无法找到" style={{ width: 150 }} {...getFieldProps('channel')} placeholder="请选择渠道" >
+           { channel }
           </Select>
         </FormItem>
-        <Button type="primary" htmlType="submit">查询</Button>
+        <Button type="primary" htmlType="submit"  style={{ marginLeft:20 }} id="query">查询</Button>
+        <Button type="default" onClick={ this.handleReset } style={{ marginLeft:20 }} >重置</Button>
       </Form>
      )
   }
@@ -174,114 +143,255 @@ var FilterForm = React.createClass({
 
 FilterForm = Form.create()(FilterForm)
 
+var hasOper = false;
+
 var filParam = {};
 
-var Billingname = React.createClass({
+var TableContent = React.createClass({
   getInitialState() {
     return { 
-      url:'http://bnm.stnts.dev/billing-name/children?id=' + this.props.location.state.parentId 
+      url:rootURL + '/business/BaiduXML/billing-name/' + this.props.locationQuery.state.parentId + '/index' ,
+      params:{ //给分页点击使用 保存筛选数据
+            status: 'all',
+            line: '',
+            channel: '',
+            per_page: 10,
+            page: 1
+      }, 
+      data: [], //表格数据
+      pagination: { //分页对象
+        showSizeChanger: true,
+        pageSize:10,
+        current:1,
+        showTotal:function(total){
+          return `共 ${total} 条`;
+        }
+      }
     };
   },
-  filterParam:function(params){
-   console.log("触发筛选",params)
-   filParam = params;
-   this.setState({
-    url:'http://bnm.stnts.dev/billing-name/children?id=' + this.props.location.state.parentId 
-   })
+  mixins: [PlatformMap],
+  fromFilter:function(params){
+    
+      const _this = this;
 
-  },
-  // handleSubmit() {
-  //   var formdData = {
-  //       name:this.refs.billingname.refs.input.value,
-  //       comment:this.refs.note.refs.input.value
-  //   }
-  //   this.fetch(formdData)
-  // },
-  // fetch(formdata) {
-  //   reqwest({
-  //     url:'http://bnm.stnts.dev/billing-name/store/',
-  //     data:{
-  //       business_id:1,
-  //       parent: this.props.location.query.id,
-  //       name:formdata.name,
-  //       comment:formdata.comment,
-  //       _token:window._TOKEN
-  //     },
-  //     method: 'post',
-  //     type: 'json',
-  //   }).then(result => {
-  //     message.info(result.data);
-  //     this.setState({
-  //       visible: false
-  //     });
-  //   }, function (err, msg) {
-  //     if(err.status == 422){
-  //       var i,
-  //           ele,
-  //           msg = '',
-  //           msgObj = JSON.parse(err.responseText).info;
-  //       for(i = 0;i < msgObj.length; i++){
-  //          for(var ele in msgObj[i]){
-  //            msg += msgObj[i][ele]+'\n\n'
-  //          }
-  //       }
-  //       message.error(msg);
-  //     }
-  //   })
-  // },
-  fetch:function(url,callbackone,callbacktwo){
-      reqwest({
-        url:url,
-        method: 'get',
-        type: 'json'
-      }).then(result => {
-          callbackone();
-        },function(){
-          callbacktwo();
-          console.log("失败")
-        }
-      )
-  },
-  delete:function(id){
-      return () =>{
-          this.fetch('',function(){
-              $(e.target).eq(0).closest('tr').remove();
-          },function(){
-              alert('ERROR')
-          })
+      var filters = {
+          status: params.status,
+          line: params.line,
+          channel: params.channel,
+          per_page: 10,
+          page: 1
       }
+      var url = rootURL + '/business/BaiduXML/billing-name/' + params.name + '/index';
+      var pager = _this.state.pagination;
+      pager.current = 1 ;
+      pager.pageSize = 10 ;
+
+
+      _this.fetch(url,function(result){
+        
+        const pagination = _this.state.pagination;
+              pagination.total = result.data.total;
+
+        if(_this.isMounted()){
+          _this.setState({
+            data:result.data.data,
+            selectedRowKeys : [],
+            params:params,
+            pagination:pager
+          })
+        }
+
+      },function(){
+
+      },filters,'get')
+    },
+  handleTableChange(pagination) {
+    
+      const pager = this.state.pagination;
+      pager.current = pagination.current;
+      pager.pageSize = pagination.pageSize;
+
+      this.setState({
+        pagination: pager,
+      });
+
+      const _this = this;
+      _this.fetch(_this.state.url,function(result){
+        const pagination = _this.state.pagination;
+              pagination.total = result.data.total;
+
+        if(_this.isMounted()){
+          _this.setState({
+            data:result.data.data
+          })
+        }
+
+      },function(){
+
+      },{
+         status:_this.state.params.status,
+         line:_this.state.params.line,
+         channel: _this.state.params.channel,
+         per_page: pagination.pageSize,
+         page: pagination.current
+      },
+      'get')
+  },
+  delete:function(channelId){
+    return () =>{
+
+      const _this = this;
+
+       confirm({
+            title: '警告',
+            content: '确定删除？',
+            onOk() {
+              del();
+            }
+          });
+
+       var del = function(){
+            _this.fetch(rootURL + '/business/BaiduXML/destroy/' + channelId,function(result){
+             if(result.status === 'success'){
+               ModalSuccess('提示','删除成功!');
+
+               hasOper = true;
+               document.getElementById('query').click();
+               hasOper = false;
+
+             }else{
+               ModalError('提示',result.info);
+             }
+           },function(){
+              ModalError('提示','请求失败!');
+           },{},'post')
+       }
+
+     
+    }
+  },
+  recover:function(channelId){
+    return () =>{
+      this.fetch(rootURL + '/business/BaiduXML/restore/' + channelId,function(result){
+         if(result.status === 'success'){
+           ModalSuccess('提示','恢复成功!');
+
+           hasOper = true;
+           document.getElementById('query').click();
+           hasOper = false;
+
+         }else{
+           ModalError('提示',result.info);
+         }
+       },function(){
+          ModalError('提示','请求失败!');
+       },{},'post')
+    }
+  },
+  fetch:function(url,callbackone,callbacktwo,fieldObj,method){
+      reqwest({
+      url:url,
+      data:fieldObj ,
+      method:method?method:'post',
+      type:'json'
+    }).then(result =>{
+      callbackone(result);
+    },function(){
+      callbacktwo();
+    })
+  },
+  componentDidMount:function(){
+      const _this = this;
+      _this.fetch(_this.state.url,function(result){
+        const pagination = _this.state.pagination;
+              pagination.total = result.data.total;
+
+        if(_this.isMounted()){
+          _this.setState({
+            data:result.data.data
+          },function(){
+             _this.props.loadingTo({loading:false});
+          })
+
+        }
+
+      },function(){
+
+      },_this.state.params,
+      'get')
+  },
+  setLoading:function(params){
+      this.props.loadingTo(params);
   },
   render() {
 
-   var ID = this.props.location.query.id ,
-       parentname = this.props.location.state.name ,
-       _this = this;
-    console.log('parentname',parentname)
+    var  _this = this,
+        ID = this.props.locationQuery.query.id ,
+        parentname = this.props.locationQuery.state.name ;
+
+    var updateStyle = 'inline-block',
+        adStyle = 'inline-block',
+        deleteStyle = 'inline-block',
+        recoverStyle = 'none';
+   
     var columns = [{
           title: '子计费名',
-          dataIndex: 'billingname_children'
+          dataIndex: 'name'
         }, {
           title: '当前所属渠道',
-          dataIndex: 'channel'
-        }, {
-          title: '所属广告位',
-          dataIndex: 'ad'
+          dataIndex: 'channel_name',
+          render:function(text, record, index){
+            return record.relation?record.relation.channel.name:'';
+          }
         }, {
           title: '投放平台',
-          dataIndex: 'platform'
+          dataIndex: 'relation',
+           render:function(text, record, index){
+            return _this.props.platformMap[text?text.line:''];
+          }
         }, {
           title: '创建时间',
-          dataIndex: 'create_time'
+          dataIndex: 'created_at'
         }, {
           title: '渠道有效时间',
-          dataIndex: 'channel_time'
-        }, {
-          title: '状态',
-          dataIndex: 'states'
+          dataIndex: 'oktime',
+          render:function(text, record, index){
+            if(record.relation){
+              return (record.relation.start ? record.relation.start : '') + ' 至 ' + (record.relation.expire ? record.relation.expire : '');
+            }else{
+              return '';
+            }
+          }
         }, {
           title: '备注',
           dataIndex: 'comment',
+          className:'my-commentmax-width'
+        }, {
+          title: 'deleted_at',
+          dataIndex: 'deleted_at',
           className:'antd-hidden'
+        }, {
+          title: '状态',
+          dataIndex: 'states',
+          render:function(text, record, index){
+             if(record.deleted_at){
+
+              updateStyle = 'none',
+              adStyle = 'none',
+              deleteStyle = 'none',
+              recoverStyle = 'inline-block';
+
+              return '已删除';
+             }else{
+
+              updateStyle = 'inline-block',
+              adStyle = 'inline-block',
+              deleteStyle = 'inline-block',
+              recoverStyle = 'none';
+              
+              return '启用';
+             }
+          }
         }, {
           title: '操作',
           dataIndex: 'operations',
@@ -296,17 +406,21 @@ var Billingname = React.createClass({
                                       type:"update",
                                       name : record.name ,
                                       platform : record.platform ,
+                                      comment : record.comment ,
                                       ID : ID ,
-                                      parent : parentname ,
-                                      comment : record.comment
+                                      id: record.id,
+                                      parent : parentname,
+                                      parentId : _this.props.locationQuery.state.parentId
                                      }  
-                            }} style={{ textDecoration:'underline' }}> 修改 </Link>
-                  &nbsp;
-                  <Link to={{  pathname:"business/BaiduXML/history",state:{ type:1,id:record.id } }} style={{ textDecoration:'underline' }} > 关联历史 </Link>
-                  &nbsp;
-                  <a target="_self" href="http://192.168.2.6:8091/login.do" style={{ textDecoration:'underline' }}> 广告代码 </a>
-                  &nbsp;
-                  <a  onClick={ _this.delete(record.id) } style={{ textDecoration:'underline' }}> 删除 </a>
+                            }} style={{ textDecoration:'underline',display:updateStyle,marginRight:'5%' }}> 修改 </Link>
+                 
+                  <a  onClick={ _this.delete(record.id) } style={{ textDecoration:'underline',display:deleteStyle,marginRight:'5%' }}> 删除 </a>
+                  
+                  <a ref='del' onClick={ _this.recover(record.id) } style={{ textDecoration:'underline',display:recoverStyle,marginRight:'5%'  }} > 恢复 </a>
+                  
+                  <Link to={{  pathname:"business/BaiduXML/history",state:{ type:1,id:record.id,name:parentname,child_name:record.name } }} style={{ textDecoration:'underline',marginRight:'5%' }} > 关联历史 </Link>
+                  
+                  <a target="_self" href="javascript:alert('暂无功能!')" style={{ textDecoration:'underline',display:adStyle }}> 广告代码 </a>
                 </div>
             )
 
@@ -314,30 +428,60 @@ var Billingname = React.createClass({
         }
     ];
 
-    const formItemLayout = {
-      labelCol: { span: 4 },
-      wrapperCol: { span: 20 },
-    };
+   
     return (
-      <div style={{ display:'inline-block',width:100+'%' }}>
-      	<h3 style={{ margin:'15px 0 20px 20px',display:'inline-block' }}>业务 > 百度XML > 子计费名</h3>
-        <Button type="primary"  style={{ margin:'1% 0 1% 80%' }}>
-          <Link to={{
-            pathname : "/business/BaiduXML/childupdate" ,
-            state:{ 
-              type:'add' ,
-              adtype:'百度XML',
-              ID:ID ,
-              parent :parentname
-             }
-          }} ><Icon type="plus" />添加子计费名</Link>
-        </Button>
-        <FilterForm filterParam={ this.filterParam }/>
-        <Paging url={this.state.url} columns={columns} params={ filParam }/>
+      <div>
+        <FilterForm filterParam={ this.fromFilter } locationState={ this.props.locationQuery.state }/>
+        <Table  columns={columns}
+                dataSource={this.state.data}
+                pagination={this.state.pagination}
+                onChange={this.handleTableChange}
+                rowKey={ function(record){
+                  return record.id || record.start
+              } }
+              style={{ width:'98%',marginLeft:20 }}
+            />
       </div>
     );
   },
 });
+
+
+var Billingname = React.createClass({
+  getInitialState() {
+      return {
+          filterParams : {} ,
+          loading : true
+      };
+  },
+  setLoading:function(params){
+    this.setState({ 
+      loading:params.loading
+    })
+  },
+  render:function(){
+    return (
+      <div>
+        <Spin spinning={ this.state.loading }>
+           <Header params={{
+            title: '业务 > 百度XML > 子计费名',
+            operTitle: '添加子计费名',
+            route:{
+              pathname : "/business/BaiduXML/childupdate" ,
+              state:{ type:'add' ,
+                      adtype:'百度XML',
+                      ID:this.props.location.query.id ,
+                      parent :this.props.location.state.name,
+                      parentId: this.props.location.state.parentId
+                    }
+            }
+           }}/>
+           <TableContent locationQuery={ this.props.location } parentToTable={ this.state.filterParams } loadingTo={ this.setLoading }/>
+        </Spin>
+      </div>
+    )
+  }
+})
 
 
 export default Billingname;

@@ -7,7 +7,10 @@ let modalError = function(title,content){
 	});
 
 	setTimeout(function(){
-	  document.getElementsByClassName('ant-confirm-btns')[0].firstChild.click()
+		var btnClose = document.getElementsByClassName('ant-confirm-btns')[0];
+		if(btnClose){
+			btnClose.firstChild.click();
+		}
 	},1500);
 }
 
