@@ -2,7 +2,6 @@
 import {Menu, Icon} from 'antd';
 import {Link,hashHistory} from 'react-router';
 
-import '../../resources/css/antd.css';
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;

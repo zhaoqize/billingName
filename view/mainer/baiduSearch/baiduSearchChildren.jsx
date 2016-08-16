@@ -18,7 +18,6 @@ import { ModalSuccess,
          ModalError, 
          Header } from '../../component/index';
 
-import '../../../resources/css/antd.css';
 
 const createForm = Form.create;
 const FormItem = Form.Item;

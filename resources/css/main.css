@@ -1,0 +1,39 @@
+body{
+  margin: 0;
+  padding: 0;
+}
+#header{
+  height:42px;
+  background:linear-gradient(to bottom, #2DB7F5 , #5FAFD1);
+}
+#bodyer{
+  height:96%;
+  width:100%;
+}
+.h2bgc{
+  background-color: #f5f5dc;
+}
+.antd-hidden{
+  display: none;
+}
+.ant-menu-submenu-inline > .ant-menu-submenu-title:after{
+  content:'' !important;
+}
+.my-commentmax-width{
+  max-width: 300px;
+  overflow: hidden;
+}
+.ant-menu-dark.ant-menu-inline .ant-menu-item-selected{
+  background:linear-gradient(to bottom, #2DB7F5 , #5FAFD1);
+}
+dt{
+  margin:0.5em !important;
+}
+dd{
+  margin:0.5em !important;
+  margin-left: 2em !important;
+}
+.hr-border{
+  border: 1px solid #E9E9E9;
+  border-width: 0 0 1px 0;
+}

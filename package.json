@@ -4,27 +4,29 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "dev": "webpack-dev-server --port 9090 --devtool eval --progress --colors --hot --content-base ./"
+    "dev": "webpack-dev-server --port 9090 --devtool cheap-module-eval-source-map --progress --colors --hot --content-base ./"
   },
   "devDependencies": {
     "babel-core": "^6.9.1",
     "babel-loader": "^6.2.4",
     "babel-plugin-antd": "^0.4.1",
+    "babel-polyfill": "^6.9.1",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
     "css-loader": "^0.23.1",
     "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "less-loader": "^2.2.3",
     "style-loader": "^0.13.1",
-    "url-loader": "^0.5.7"
+    "url-loader": "^0.5.7",
+    "webpack": "^1.5.1",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "antd": "^1.3.2",
-    "babel-polyfill": "^6.9.1",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-router": "^2.4.1",
-    "reqwest": "^2.0.5",
-    "webpack": "^1.5.1",
-    "webpack-dev-server": "^1.14.1"
+    "reqwest": "^2.0.5"
   }
 }

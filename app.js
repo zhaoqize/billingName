@@ -3,17 +3,21 @@
 
 import {Router} from 'react-router';
 
-import './resources/css/clearDefault.css'
+import Header from './view/header/header';
 
-import Header from './view/header/header.jsx';
+import router from './routes/routes';
 
-import router from './routes/routes.js';
+import './resources/css/default.css';
+
+import './resources/css/main.css';
+
+import './resources/css/antd.css';
 
 
 
-
-window.rootURL = 'http://' + window.location.host;
-
+window.rootURL = 'http://bnm-t.stnts.com';
+//window.rootURL = 'http://' + window.location.host;
+//window.rootURL = 'http://bnm.stnts.dev'
 
 //outline渲染
 

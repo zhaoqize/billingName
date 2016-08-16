@@ -8,7 +8,6 @@ import { Link,
          Route } from 'react-router';
 import reqwest from 'reqwest';
 
-import '../../resources/css/antd.css';
 
 import { ModalWarn,
          ModalError } from '../component/index';
