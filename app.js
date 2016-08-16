@@ -15,9 +15,9 @@ import './resources/css/antd.css';
 
 
 
-window.rootURL = 'http://bnm-t.stnts.com';
-//window.rootURL = 'http://' + window.location.host;
-//window.rootURL = 'http://bnm.stnts.dev'
+
+window.rootURL = 'http://' + window.location.host;
+
 
 //outline渲染
 
